@@ -5,8 +5,8 @@ using NSubstitute;
 
 namespace ConfHub.Tests;
 
-/// <summary>Unit tests for AgentService recommendation logic.</summary>
-public class AgentServiceTests
+/// <summary>Unit tests for ICosmosDbService interactions and Session model behaviour.</summary>
+public class CosmosDbServiceTests
 {
     private readonly ICosmosDbService _db = Substitute.For<ICosmosDbService>();
 

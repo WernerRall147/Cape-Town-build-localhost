@@ -89,6 +89,6 @@ public sealed class AgentService : IAgentService
             : sessions.ToList();
 
         return string.Join("\n", filtered.Select(s =>
-            $"- [{s.Level}] \"{s.Title}\" by {s.Speaker} | Track: {s.Track} | {s.Abstract[..Math.Min(120, s.Abstract.Length)]}..."));
+            $"- [{s.Level}] \"{s.Title}\" by {s.Speaker} | Track: {s.Track} | {(s.Abstract.Length > 120 ? s.Abstract[..120] + "..." : s.Abstract)}"));
     }
 }
