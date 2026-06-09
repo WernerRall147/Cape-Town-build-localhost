@@ -1,0 +1,18 @@
+## .NET build outputs
+bin/
+obj/
+TestResults/
+*.user
+*.suo
+.vs/
+
+## NuGet
+*.nupkg
+packages/
+
+## Coverage
+coverage/
+*.cobertura.xml
+
+## Secrets — never commit these
+appsettings.Development.json
