@@ -1,28 +1,42 @@
-using Azure.AI.Projects;
+using Azure.AI.Agents.Persistent;
 using Azure.Identity;
 using ConfHub.Api.Models;
 
 namespace ConfHub.Api.Services;
 
 /// <summary>
-/// Uses Azure AI Foundry Agent Service to recommend conference sessions
-/// based on a topic and the current session catalogue.
+/// Uses the Azure AI Foundry Agent Service (GA Persistent Agents SDK) to recommend
+/// conference sessions based on a topic and the current session catalogue.
+/// Authentication is keyless via Microsoft Entra ID (<see cref="DefaultAzureCredential"/>).
 /// </summary>
 public sealed class AgentService : IAgentService
 {
-    private readonly AIProjectClient _projectClient;
-    private readonly string _agentId;
+    private readonly PersistentAgentsClient _client;
+    private readonly string _modelDeploymentName;
+    private readonly string? _configuredAgentId;
     private readonly ILogger<AgentService> _logger;
+    private readonly SemaphoreSlim _agentLock = new(1, 1);
+    private string? _agentId;
+
+    private const string AgentName = "confhub-session-recommender";
+    private const string AgentInstructions =
+        "You are a friendly conference session recommender for the ConfHub event. " +
+        "Given a catalogue of sessions and a topic of interest, recommend the most relevant " +
+        "sessions. Reply with session titles and a short reason for each. Keep it concise.";
 
     public AgentService(IConfiguration configuration, ILogger<AgentService> logger)
     {
         _logger = logger;
-        var connectionString = configuration["AzureAIFoundry:ConnectionString"]
-            ?? throw new InvalidOperationException("AzureAIFoundry:ConnectionString is not configured.");
-        _agentId = configuration["AzureAIFoundry:AgentId"]
-            ?? throw new InvalidOperationException("AzureAIFoundry:AgentId is not configured.");
 
-        _projectClient = new AIProjectClient(connectionString, new DefaultAzureCredential());
+        var projectEndpoint = configuration["AzureAIFoundry:ProjectEndpoint"]
+            ?? throw new InvalidOperationException(
+                "AzureAIFoundry:ProjectEndpoint is not configured. " +
+                "Expected the form https://<resource>.services.ai.azure.com/api/projects/<project-name>.");
+
+        _modelDeploymentName = configuration["AzureAIFoundry:ModelDeploymentName"] ?? "gpt-4o-mini";
+        _configuredAgentId = configuration["AzureAIFoundry:AgentId"];
+
+        _client = new PersistentAgentsClient(projectEndpoint, new DefaultAzureCredential());
     }
 
     public async Task<RecommendResponse> RecommendSessionsAsync(
@@ -31,55 +45,103 @@ public sealed class AgentService : IAgentService
         int? level = null,
         CancellationToken ct = default)
     {
-        var agentsClient = _projectClient.GetAgentsClient();
-
-        // Build a context payload from the session catalogue
+        var agentId = await EnsureAgentAsync(ct);
         var catalogue = BuildCatalogueText(allSessions, level);
 
-        var thread = await agentsClient.CreateThreadAsync(cancellationToken: ct);
+        PersistentAgentThread thread = await _client.Threads.CreateThreadAsync(cancellationToken: ct);
 
         var userMessage = $"""
-            You are a helpful conference session recommender.
-
             Session catalogue:
             {catalogue}
 
-            Based on the above sessions, recommend the best sessions for someone interested in: {topic}
+            Recommend the best sessions for someone interested in: {topic}
             {(level.HasValue ? $"Preferred level: {level}" : string.Empty)}
-
-            Return a friendly recommendation with session titles and brief reasons.
             """;
 
-        await agentsClient.CreateMessageAsync(thread.Value.Id, MessageRole.User, userMessage, cancellationToken: ct);
+        await _client.Messages.CreateMessageAsync(thread.Id, MessageRole.User, userMessage, cancellationToken: ct);
 
-        var run = await agentsClient.CreateRunAsync(thread.Value.Id, _agentId, cancellationToken: ct);
+        ThreadRun run = await _client.Runs.CreateRunAsync(thread.Id, agentId, cancellationToken: ct);
 
-        // Poll until the run completes
-        while (run.Value.Status == RunStatus.Queued || run.Value.Status == RunStatus.InProgress)
+        // Poll until the run reaches a terminal status.
+        while (run.Status == RunStatus.Queued || run.Status == RunStatus.InProgress)
         {
-            await Task.Delay(500, ct);
-            run = await agentsClient.GetRunAsync(thread.Value.Id, run.Value.Id, cancellationToken: ct);
+            await Task.Delay(TimeSpan.FromMilliseconds(500), ct);
+            run = await _client.Runs.GetRunAsync(thread.Id, run.Id, ct);
         }
 
-        if (run.Value.Status != RunStatus.Completed)
-        {
-            _logger.LogWarning("Agent run finished with status {Status}", run.Value.Status);
-            return new RecommendResponse("Unable to generate recommendations at this time.", allSessions);
-        }
-
-        var messages = await agentsClient.GetMessagesAsync(thread.Value.Id, cancellationToken: ct);
-        var assistantReply = messages.Value.Data
-            .Where(m => m.Role == MessageRole.Agent)
-            .SelectMany(m => m.ContentItems.OfType<MessageTextContent>())
-            .Select(c => c.Text)
-            .FirstOrDefault() ?? "No recommendation generated.";
-
-        // Filter sessions loosely matching the topic for the response payload
         var relevantSessions = allSessions
             .Where(s => level == null || s.Level == level)
             .ToList();
 
+        if (run.Status != RunStatus.Completed)
+        {
+            _logger.LogWarning("Agent run finished with status {Status}: {Error}", run.Status, run.LastError?.Message);
+            return new RecommendResponse("Unable to generate recommendations at this time.", relevantSessions);
+        }
+
+        var assistantReply = await ReadAssistantReplyAsync(thread.Id, ct);
         return new RecommendResponse(assistantReply, relevantSessions);
+    }
+
+    private async Task<string> EnsureAgentAsync(CancellationToken ct)
+    {
+        if (_agentId is not null)
+        {
+            return _agentId;
+        }
+
+        await _agentLock.WaitAsync(ct);
+        try
+        {
+            if (_agentId is not null)
+            {
+                return _agentId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(_configuredAgentId))
+            {
+                _agentId = _configuredAgentId;
+                return _agentId;
+            }
+
+            PersistentAgent agent = await _client.Administration.CreateAgentAsync(
+                model: _modelDeploymentName,
+                name: AgentName,
+                instructions: AgentInstructions,
+                cancellationToken: ct);
+
+            _agentId = agent.Id;
+            _logger.LogInformation("Created Foundry agent {AgentId} using model {Model}", _agentId, _modelDeploymentName);
+            return _agentId;
+        }
+        finally
+        {
+            _agentLock.Release();
+        }
+    }
+
+    private async Task<string> ReadAssistantReplyAsync(string threadId, CancellationToken ct)
+    {
+        await foreach (PersistentThreadMessage message in
+            _client.Messages.GetMessagesAsync(threadId, order: ListSortOrder.Descending, cancellationToken: ct))
+        {
+            if (message.Role != MessageRole.Agent)
+            {
+                continue;
+            }
+
+            var text = message.ContentItems
+                .OfType<MessageTextContent>()
+                .Select(c => c.Text)
+                .FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                return text;
+            }
+        }
+
+        return "No recommendation generated.";
     }
 
     private static string BuildCatalogueText(IReadOnlyList<Session> sessions, int? level)

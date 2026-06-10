@@ -11,8 +11,7 @@ public static class SessionEndpoints
     public static IEndpointRouteBuilder MapSessionEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/sessions")
-            .WithTags("Sessions")
-            .WithOpenApi();
+            .WithTags("Sessions");
 
         // GET /sessions
         group.MapGet("/", async (ICosmosDbService db, CancellationToken ct) =>

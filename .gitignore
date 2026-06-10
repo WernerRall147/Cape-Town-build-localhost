@@ -399,3 +399,14 @@ FodyWeavers.xsd
 
 # macOS DS_Store files
 *.DS_Store
+
+# ── Azure Developer CLI (azd) ────────────────────────────────────────────────
+# Local azd environment state — contains subscription/tenant IDs and secrets.
+# Never commit these.
+.azure/
+*.env
+!*.env.sample
+
+# Service principal credentials emitted by setup scripts
+*.sp.json
+azure-credentials.json

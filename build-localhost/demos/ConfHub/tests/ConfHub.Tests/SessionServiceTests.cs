@@ -2,6 +2,7 @@ using ConfHub.Api.Models;
 using ConfHub.Api.Services;
 using FluentAssertions;
 using NSubstitute;
+using Xunit;
 
 namespace ConfHub.Tests;
 

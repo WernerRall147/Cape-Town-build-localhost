@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/ConfHub.Api/bin/Debug/net8.0/ConfHub.Api.dll",
+      "program": "${workspaceFolder}/src/ConfHub.Api/bin/Debug/net10.0/ConfHub.Api.dll",
       "args": [],
       "cwd": "${workspaceFolder}/src/ConfHub.Api",
       "stopAtEntry": false,

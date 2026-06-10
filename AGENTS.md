@@ -2,229 +2,91 @@
 
 ## Project Overview
 
-The **microsoft/community-content** repository provides prepared "content-in-a-box" presentation materials for user groups, meetups, and community events. This repository contains PowerPoint presentations, supporting documentation, demo resources, and marketing materials for technical talks on Microsoft technologies.
+This repository contains the **Ship It** demo for **Build //localhost Cape Town**:
+a fully repeatable, end-to-end build of an AI-powered cloud application using
+GitHub Copilot agent mode, .NET 10, Azure Cosmos DB, Azure AI Foundry, MCP, and the
+Azure Developer CLI (azd).
 
-**Current Focus**: Season of AI - MCP (Model Context Protocol) - October 2025 to January 2026
+The demo app is **ConfHub** — a conference session tracker that exposes a REST API,
+AI-powered recommendations (Azure AI Foundry Persistent Agents), and an MCP server
+that GitHub Copilot can query for live data.
 
-**Key Technologies**: Documentation repository (Markdown, PowerPoint, Word documents)
+## Repository Structure
 
-**Repository Structure**:
-- `Season-of-AI_MCP/` - Active season content (presentations, marketing kits, organizer kits)
-- `archive/` - Previous seasons' content (Seasons 1-4: Azure AI, Copilots, Best of Ignite, Season of Agents)
-- `assets/` - Images and visual resources
-- Root documentation: README.md, CODE_OF_CONDUCT.md, SECURITY.md, LICENSE files
+```
+.
+├── README.md                       # Repo landing page → points to the demo
+├── .env.sample                     # Copy to .azure/.env (subscription + tenant)
+└── build-localhost/
+    ├── README.md                   # Session pointer
+    ├── session-details.md          # Session abstract / outline / takeaways
+    └── demos/ConfHub/              # The demo application
+        ├── azure.yaml              # azd service definition
+        ├── nuget.config            # Repo-local NuGet source (reliable restore)
+        ├── infra/                  # Bicep IaC (Cosmos, Foundry, Container Apps, RBAC)
+        ├── scripts/                # PowerShell: provision / seed / cleanup / SP
+        ├── src/ConfHub.Api/        # .NET 10 Minimal API
+        └── tests/ConfHub.Tests/    # xUnit tests
+```
 
-## Content Organization
+## Tech Stack
 
-### Active Content
-- **Location**: `Season-of-AI_MCP/`
-- **Contains**: PowerPoint presentations, explainer decks, marketing materials, organizer kits
-- **Current Topic**: Model Context Protocol (MCP) - "Let's Learn MCP" session materials
+- **.NET 10** Minimal API
+- **Azure Cosmos DB** — serverless, keyless (Microsoft Entra ID / managed identity)
+- **Azure AI Foundry** — `Azure.AI.Agents.Persistent` (GA) Persistent Agents SDK
+- **Model Context Protocol** — `ModelContextProtocol.AspNetCore`
+- **OpenAPI** — built-in .NET 10 document + Scalar UI
+- **Testing** — xUnit, NSubstitute, FluentAssertions, Coverlet
+- **IaC / deploy** — Bicep + Azure Developer CLI (azd) → Azure Container Apps
 
-### Archived Content
-- **Location**: `archive/`
-- **Seasons**:
-  - S1: Azure AI topics
-  - S2: Copilots and GitHub Copilot topics
-  - S3: Best of Ignite highlights
-  - S4: Season of Agents
+## Build & Test
 
-### File Types
-- `.pptx` - PowerPoint presentations (primary content format)
-- `.md` - Markdown documentation and session descriptions
-- `.docx` - Word documents with supporting materials
-- `.png`, `.jpg` - Images and screenshots
+All commands run from `build-localhost/demos/ConfHub`:
 
-## Development Workflow
+```bash
+dotnet restore
+dotnet build --configuration Release
+dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults
+```
 
-### Adding New Content
+Run the API locally (after provisioning): `dotnet run --project src/ConfHub.Api`
+→ http://localhost:5000 (Scalar at `/scalar`, MCP at `/mcp`).
 
-1. **Determine Content Location**:
-   - Active season content goes in `Season-of-AI_MCP/`
-   - Archived content should remain in `archive/` subdirectories
-   - Supporting assets go in `assets/`
+> A repo-local `nuget.config` pins the `nuget.org` source so restore is reliable
+> even if machine-level NuGet sources are misconfigured.
 
-2. **Content Standards**:
-   - PowerPoint presentations should include speaker notes
-   - Include README.md with session descriptions and demo links
-   - Reference external demo repositories with aka.ms links
-   - Maintain consistent branding and formatting
+## Provision & Cleanup (repeatable)
 
-3. **File Naming**:
-   - Use descriptive, kebab-case names for markdown files
-   - PowerPoint files may use title case with spaces
-   - Avoid special characters except hyphens and underscores
+Scripts read the subscription/tenant from `.azure/.env`. They never sign you in —
+if the Azure context is wrong they print the exact `az login` command.
 
-### Repository Conventions
+```powershell
+./scripts/Setup-ServicePrincipal.ps1   # optional: SP for CI/automation
+./scripts/Provision.ps1                 # azd up — infra + deploy
+./scripts/Seed-Cosmos.ps1               # seed sample sessions via the API
+./scripts/Cleanup.ps1                   # azd down --force --purge
+```
 
-- **No Build Process**: This is a documentation repository with no compilation or build steps
-- **No Dependencies**: No package.json, requirements.txt, or dependency management files
-- **No Testing Framework**: Content is manually reviewed
-- **Version Control**: Use Git for tracking changes to presentations and documentation
+Validate infrastructure changes with: `az bicep build --file infra/main.bicep`.
 
-## Content Guidelines
+## Conventions
 
-### Presentation Materials
+- Use `ICosmosDbService` / `IAgentService` abstractions — never call Cosmos or AI
+  Foundry directly from endpoints.
+- Endpoints live in `SessionEndpoints.cs` (`MapGroup`); MCP tools in
+  `SessionMcpTools.cs` (`[McpServerTool]`).
+- Prefer keyless auth (`DefaultAzureCredential` + managed identity); no secrets in
+  source control.
+- `async`/`await` with `CancellationToken` throughout; `record` types for DTOs.
+- Tests use NSubstitute (never Moq) and FluentAssertions.
 
-- **Format**: PowerPoint (.pptx) is the primary format
-- **Duration**: Sessions designed for 30-45 minutes plus Q&A
-- **Speaker Notes**: Include detailed notes for presenters
-- **Customization**: Content can be remixed and adapted by speakers
-- **Branding**: Maintain Microsoft Season of AI branding
+## Security
 
-### Documentation
-
-- **README Files**: Each content folder should have a README.md describing available sessions
-- **Session Descriptions**: Include:
-  - Session title and overview
-  - Target audience level (beginner, intermediate, advanced)
-  - Links to supporting demo code repositories
-  - Links to presentation slides
-  - Additional resources and materials
-
-### Supporting Materials
-
-- **Marketing Kits**: Located in `Season-of-AI_MCP/Marketing Kit/`
-- **Organizer Kits**: Located in `Season-of-AI_MCP/Organizer Kit/`
-- **QR Codes**: Include attendee survey QR codes in presentations
-- **Assets**: Store reusable images and graphics in `assets/`
-
-## External Resources
-
-### Demo Code Repositories
-
-Demo code is maintained in separate repositories and linked via aka.ms URLs:
-- C# demos: https://aka.ms/letslearnmcp-csharp
-- Java demos: https://aka.ms/letslearnmcp-java
-- JavaScript demos: https://aka.ms/letslearnmcp-javascript
-- Python demos: https://aka.ms/letslearnmcp-python
-
-### Event Registration
-
-- Event registration: https://aka.ms/soai/mcp/registerevent
-- Developer community: https://aka.ms/soai/mcp/devcom
-- Attendee survey: https://aka.ms/soai/mcp/attendeesurvey
-- FAQs: https://aka.ms/soai/mcp/faq
-
-## Contributing
-
-### Pull Request Guidelines
-
-1. **Title Format**: Use clear, descriptive titles
-   - Example: "Add new MCP session materials"
-   - Example: "Update Season 5 marketing kit"
-
-2. **Changes to Active Content**:
-   - Update `Season-of-AI_MCP/` for current season materials
-   - Update README.md to reflect new or modified content
-   - Ensure all links are functional and use aka.ms shortcuts where appropriate
-
-3. **Archiving Content**:
-   - When a season ends, content moves to `archive/`
-   - Maintain README files in archived directories
-   - Update root README.md to reflect current season
-
-4. **Required Checks**:
-   - Verify all markdown files render correctly
-   - Test all hyperlinks (aka.ms links and external URLs)
-   - Review PowerPoint presentations for completeness
-   - Ensure branding and formatting are consistent
-
-### Code of Conduct
-
-This project follows the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-
-### Contributor License Agreement (CLA)
-
-Contributors must agree to the Microsoft CLA. A bot will automatically guide you through this process when you submit a pull request.
+- `.azure/` (including `.env` and any `*.sp.json` credentials) is git-ignored.
+- Cosmos DB and AI Foundry are provisioned with `disableLocalAuth: true`; access is
+  via Microsoft Entra ID role assignments defined in `infra/resources.bicep`.
 
 ## Licensing
 
-- **Documentation and Content**: [Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode) (see LICENSE file)
-- **Sample Code**: [MIT License](https://opensource.org/licenses/MIT) (see LICENSE-CODE file)
-
-## Common Tasks
-
-### Viewing Repository Structure
-```bash
-# List all content directories
-ls -la
-
-# View current season content
-ls -la Season-of-AI_MCP/
-
-# View archived seasons
-ls -la archive/
-
-# List all markdown files
-find . -name "*.md"
-
-# List all presentations
-find . -name "*.pptx"
-```
-
-### Working with Git
-```bash
-# Clone the repository
-git clone https://github.com/microsoft/community-content.git
-
-# Create a new branch for contributions
-git checkout -b my-content-updates
-
-# Stage changes
-git add .
-
-# Commit changes
-git commit -m "Description of changes"
-
-# Push changes
-git push origin my-content-updates
-```
-
-### File Management
-```bash
-# Check .gitignore to see what files are excluded
-cat .gitignore
-
-# The repository ignores:
-# - Visual Studio temporary files
-# - Build outputs (not applicable to this repo)
-# - macOS .DS_Store files
-# - Node modules (if any JavaScript tooling is added)
-```
-
-## Important Notes for AI Agents
-
-1. **No Code Compilation**: This is a documentation and presentation repository. There are no build commands, test suites, or package dependencies to manage.
-
-2. **Content-Focused**: When making changes:
-   - Prioritize clarity and accessibility of presentation materials
-   - Maintain consistency with Microsoft branding guidelines
-   - Ensure all external links are functional
-
-3. **Season-Based Organization**: 
-   - Active content is in `Season-of-AI_MCP/`
-   - Don't modify archived content unless fixing critical issues
-   - New seasons will be announced and require content migration
-
-4. **External Demo Code**: 
-   - Demo code lives in separate repositories
-   - This repository only contains links to demo code
-   - Don't attempt to add code samples directly to this repository
-
-5. **File Size Considerations**:
-   - PowerPoint and Word documents can be large (10-25MB)
-   - Consider file size when adding new presentation materials
-   - Binary files (presentations, images) should be necessary and optimized
-
-6. **Community Focus**: 
-   - Content is designed for community speakers and user groups
-   - Materials should be easy to understand and present
-   - Include speaker notes and guidance for presenters
-
-## Contact Information
-
-For questions or issues:
-- **Email**: azure-tech-groups@microsoft.com
-- **Issues**: Use GitHub Issues in this repository
-- **Security**: See SECURITY.md for reporting security vulnerabilities
+- Documentation/content: [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/legalcode) (see `LICENSE`).
+- Sample code: [MIT](https://opensource.org/licenses/MIT) (see `LICENSE-CODE`).
