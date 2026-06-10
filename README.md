@@ -1,43 +1,120 @@
-# Build //localhost Cape Town — Ship It Demo
+# Ship It! — Build //localhost: Cape Town
 
-**Ship It: Build, Test & Deploy AI-Powered Apps with GitHub Copilot and Azure AI Foundry**
+### Build, test & deploy AI-powered apps with GitHub Copilot and Azure AI Foundry
 
-A fully **repeatable**, end-to-end demo that goes from a blank VS Code window to a
-production-ready, AI-powered cloud application — showcasing the latest Microsoft
-developer stack from Build.
+> *From a blank VS Code window to a production-ready, AI-powered cloud app — live, on stage.*
+> No slides after the intro. No pre-built answers. Just real, end-to-end developer productivity.
 
-➡️ **Start here:** [build-localhost/demos/ConfHub/README.md](build-localhost/demos/ConfHub/README.md)
+**Speaker:** Werner Rall — Senior Cloud Solution Architect, Microsoft
+[GitHub](https://github.com/WernerRall147) · [LinkedIn](https://www.linkedin.com/in/werner-rall/)
+**Event:** Build //localhost: Cape Town · 13 June 2026 · `#MSBuild` `#localhost`
+**Level:** 200 — Intermediate, technical · **Duration:** 60 min (45 min live build + 15 min Q&A)
 
-## What it showcases
+➡️ **Presenter walkthrough (exact steps):** [build-localhost/demos/ConfHub/README.md](build-localhost/demos/ConfHub/README.md)
 
-- **GitHub Copilot agent mode** in VS Code
-- **.NET 10** Minimal API
-- **Azure Cosmos DB** (serverless, keyless via Microsoft Entra ID)
-- **Azure AI Foundry** — GA Persistent Agents SDK
-- **Model Context Protocol (MCP)** — grounding Copilot in live app data
-- **Azure Developer CLI (azd) + Bicep** — one command up, one command down
+---
 
-## Map
+## What you'll walk away knowing
+
+Six things, one workflow:
 
 | | |
 |---|---|
-| Session details | [build-localhost/session-details.md](build-localhost/session-details.md) |
+| **Set up VS Code & Copilot** — tuned for maximum productivity | **Build with agent mode** — a cloud app on Azure Cosmos DB, from natural language |
+| **Generate tests & coverage** — AI-guided xUnit + Coverlet, not an afterthought | **Review PRs with Copilot** — AI summaries, inline suggestions, agent-mode fixes |
+| **Build an AI Agent** — code-first with Azure AI Foundry in ~20 lines | **Ground Copilot in your data** — expose the app as an MCP server it can query live |
+
+---
+
+## What we build — ConfHub
+
+A conference session tracker: a REST API backed by Azure Cosmos DB, AI-powered
+session recommendations via an Azure AI Foundry agent, and a built-in MCP server
+that GitHub Copilot can query for live data — deployed to Azure Container Apps.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  VS Code + GitHub Copilot (agent mode)                          │
+│                                                                 │
+│  ┌─────────────────┐     ┌──────────────────┐                  │
+│  │  ConfHub API    │────▶│  Azure Cosmos DB  │  (keyless / MI) │
+│  │  (.NET 10)      │     │  (Sessions data)  │                  │
+│  └────────┬────────┘     └──────────────────┘                  │
+│           │  Azure AI Foundry (Persistent Agents)              │
+│           ▼                                                     │
+│  ┌─────────────────┐     ┌──────────────────┐                  │
+│  │  MCP Server     │◀────│  GitHub Copilot  │                  │
+│  │  (built-in)     │     │  (MCP client)    │                  │
+│  └─────────────────┘     └──────────────────┘                  │
+│                                                                 │
+│  Deployed with azd → Azure Container Apps                       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## The live build — 45 minutes
+
+| Time | Segment | What happens |
+|------|---------|--------------|
+| 0–5 min | **Setup** | Install extensions, sign in to GitHub Copilot |
+| 5–15 min | **Scaffold** | .NET 10 Minimal API + Azure Cosmos DB, via agent mode |
+| 15–25 min | **Test** | Unit tests & code coverage with Copilot |
+| 25–35 min | **Ship** | Push, open a PR, let Copilot summarise & review it |
+| 35–50 min | **Extend** | AI Agent in Azure AI Foundry, exposed via MCP |
+| 50–60 min | **Q&A** | Your questions, live |
+
+---
+
+## Take this home — five things that stick
+
+1. **Agent mode** can scaffold a full cloud app in minutes — with the right prompts.
+2. **Tests and coverage** aren't an afterthought; Copilot makes them as easy as the code.
+3. **PRs are better with AI:** automatic summaries, inline suggestions, agent-mode fixes.
+4. **Azure AI Foundry** lets you build a code-first AI Agent in ~20 lines of .NET.
+5. **MCP closes the loop** — your app becomes a live data source Copilot can query.
+
+---
+
+## Built with — the stack on stage
+
+| AI & Copilot | Azure | Platform |
+|--------------|-------|----------|
+| GitHub Copilot (agent mode) | Azure AI Foundry | .NET 10 Minimal API |
+| Copilot Chat & Edits | AI Agent Service (Persistent Agents) | xUnit · Coverlet |
+| PR summaries & review | Azure Cosmos DB (serverless, keyless) | Model Context Protocol (MCP) |
+| | Azure Container Apps · azd · Bicep | VS Code |
+
+---
+
+## Run it yourself
+
+The demo is fully repeatable — one command up, one command down. Everything is
+keyless (Microsoft Entra ID / managed identity); no secrets in source control.
+
+```powershell
+# Point the scripts at your subscription + tenant (git-ignored)
+cp .env.sample .azure/.env
+
+az login --tenant <tenant_id>
+az account set --subscription <subscription_id>
+
+./build-localhost/demos/ConfHub/scripts/Provision.ps1   # azd up — infra + deploy
+./build-localhost/demos/ConfHub/scripts/Seed-Cosmos.ps1 # seed sample sessions
+./build-localhost/demos/ConfHub/scripts/Cleanup.ps1     # azd down --force --purge
+```
+
+Full prerequisites, exact presenter steps, configuration and architecture details
+are in the **[presenter walkthrough](build-localhost/demos/ConfHub/README.md)**.
+
+| | |
+|---|---|
 | Demo app (ConfHub) | [build-localhost/demos/ConfHub](build-localhost/demos/ConfHub) |
 | Repeatable scripts | [build-localhost/demos/ConfHub/scripts](build-localhost/demos/ConfHub/scripts) |
 | Infrastructure (Bicep) | [build-localhost/demos/ConfHub/infra](build-localhost/demos/ConfHub/infra) |
+| Speaker deck | [build-localhost/Ship It - Speaker Deck.pptx](build-localhost/Ship%20It%20-%20Speaker%20Deck.pptx) |
 
-## Azure environment
-
-Copy [.env.sample](.env.sample) to `.azure/.env` and fill in your subscription and
-tenant IDs. The `.azure/` folder is git-ignored, so your IDs and any service
-principal credentials are never committed.
-
-```powershell
-cp .env.sample .azure/.env
-az login --tenant <tenant_id>
-az account set --subscription <subscription_id>
-./build-localhost/demos/ConfHub/scripts/Provision.ps1
-```
+---
 
 ## Contributing
 

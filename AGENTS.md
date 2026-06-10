@@ -15,12 +15,11 @@ that GitHub Copilot can query for live data.
 
 ```
 .
-├── README.md                       # Repo landing page → points to the demo
-├── .env.sample                     # Copy to .azure/.env (subscription + tenant)
+├── README.md                       # Session overview (aligned with the speaker deck)
 └── build-localhost/
-    ├── README.md                   # Session pointer
-    ├── session-details.md          # Session abstract / outline / takeaways
+    ├── Ship It - Speaker Deck.pptx  # Presentation
     └── demos/ConfHub/              # The demo application
+        ├── README.md               # Presenter walkthrough (exact steps)
         ├── azure.yaml              # azd service definition
         ├── nuget.config            # Repo-local NuGet source (reliable restore)
         ├── infra/                  # Bicep IaC (Cosmos, Foundry, Container Apps, RBAC)
