@@ -1,0 +1,8 @@
+# Keep local build artifacts and secrets out of the Docker build context so the
+# in-container restore/publish is clean (avoids Windows obj/ leaking into Linux builds).
+bin/
+obj/
+TestResults/
+**/appsettings.Development.json
+.vs/
+*.user

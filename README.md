@@ -1,116 +1,124 @@
-# Microsoft Build //localhost
+# Ship It! — Build //localhost: Cape Town
 
-## In‑Person Community Event Organizer Kit
+### Build, test & deploy AI-powered apps with GitHub Copilot and Azure AI Foundry
 
-![Microsoft Build //localhost banner](assets/FY26_Build_banner_ACOM_artwork_416x178.png)
+> *From a blank VS Code window to a production-ready, AI-powered cloud app — live, on stage.*
+> No slides after the intro. No pre-built answers. Just real, end-to-end developer productivity.
 
-Microsoft Build //localhost is a global series of **community‑led, hands‑on, in‑person learning events** designed to extend Microsoft Build content directly into local technical communities.
+**Speaker:** Werner Rall — Senior Cloud Solution Architect, Microsoft
+[GitHub](https://github.com/WernerRall147) · [LinkedIn](https://www.linkedin.com/in/werner-rall/)
+**Event:** Build //localhost: Cape Town · 13 June 2026 · `#MSBuild` `#localhost`
+**Level:** 200 — Intermediate, technical · **Duration:** 60 min (45 min live build + 15 min Q&A)
 
-Between **June 4–26, 2026**, MVPs and Azure Tech Groups leaders can host in‑person events with support from Microsoft.
-
----
-
-## Event Overview
-
-- **Date range:** June 4–26, 2026  
-- **Format:** In‑person only  
-- **Target audience:** Developers  
-- **Minimum attendance:** 30 participants  
+➡️ **Presenter walkthrough (exact steps):** [build-localhost/demos/ConfHub/README.md](build-localhost/demos/ConfHub/README.md)
 
 ---
 
-## Content Details
+## What you'll walk away knowing
 
-[View Build //localhost Content Catalog](https://aka.ms/MicrosoftBuild-localhost-content)
+Six things, one workflow:
 
-Microsoft Build repositories—including demos, presentation decks, and workshop materials—will be available beginning **June 4, 2026**.
-
-To help you shape your event agenda, the catalog includes:
-- **16 total sessions**
-  - **3 hands‑on labs** (approximately 75 minutes each)
-  - **12 breakout sessions** (45 minutes each)
-
-This catalog is provided to support your planning efforts. Hosts are expected to submit a **copy of their final event agenda** as part of their post‑event recap through Microsoft’s vendor, **PlainSight**.
+| | |
+|---|---|
+| **Set up VS Code & Copilot** — tuned for maximum productivity | **Build with agent mode** — a cloud app on Azure Cosmos DB, from natural language |
+| **Generate tests & coverage** — AI-guided xUnit + Coverlet, not an afterthought | **Review PRs with Copilot** — AI summaries, inline suggestions, agent-mode fixes |
+| **Build an AI Agent** — code-first with Azure AI Foundry in ~20 lines | **Ground Copilot in your data** — expose the app as an MCP server it can query live |
 
 ---
 
-## Organizer Support by Community Type
+## What we build — ConfHub
 
-### MVP‑Led User Groups
+A conference session tracker: a REST API backed by Azure Cosmos DB, AI-powered
+session recommendations via an Azure AI Foundry agent, and a built-in MCP server
+that GitHub Copilot can query for live data — deployed to Azure Container Apps.
 
-- Microsoft venue access (MVP‑only; subject to availability and local FTE support)
-- Food & Beverage (F&B) and/or venue reimbursement up to **$500 USD**
-- Hands‑on labs with **Azure credits**
-
-### Azure Tech Group‑Led User Groups
-
-- Food & Beverage (F&B) and/or venue reimbursement up to **$500 USD**
-- Hands‑on labs with **Azure credits**
-
-Azure Tech Group organizers may request up to **$500 USD total** in support, which can be applied flexibly toward either venue or F&B costs.
-
----
-
-## Funding for Food & Beverage, Venue, and Reimbursement Guidelines
-
-Food & Beverage (F&B) and/or venue support may be requested whether you are hosting at your own community location or utilizing a Microsoft venue. Availability is subject to current budget and may change.
-
-Organizers are responsible for paying **all approved expenses up front** and will be reimbursed **after the event**. Please ensure you have received **prior approval** before making any purchases, as Microsoft will not reimburse expenses that were not approved in advance.
-
-**Receipts are required for all reimbursement requests.** [Microsoft Build //localhost reimbursement details](https://plainsightevents.com/microsoftbuild)
-
----
-
-### Reimbursement Process
-
-Once your event support request is reviewed and approved through the survey—and the event is completed within the approved budget—**PlainSight**, a Microsoft vendor, will process reimbursement based on the documentation you provide. [Microsoft Build //localhost reimbursement details](https://plainsightevents.com/microsoftbuild)
-
-You will receive a confirmation email containing:
-- Your approved budget amount  
-- A link to submit reimbursement documentation  
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  VS Code + GitHub Copilot (agent mode)                          │
+│                                                                 │
+│  ┌─────────────────┐     ┌──────────────────┐                  │
+│  │  ConfHub API    │────▶│  Azure Cosmos DB  │  (keyless / MI) │
+│  │  (.NET 10)      │     │  (Sessions data)  │                  │
+│  └────────┬────────┘     └──────────────────┘                  │
+│           │  Azure AI Foundry (Persistent Agents)              │
+│           ▼                                                     │
+│  ┌─────────────────┐     ┌──────────────────┐                  │
+│  │  MCP Server     │◀────│  GitHub Copilot  │                  │
+│  │  (built-in)     │     │  (MCP client)    │                  │
+│  └─────────────────┘     └──────────────────┘                  │
+│                                                                 │
+│  Deployed with azd → Azure Container Apps                       │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-### Required Reimbursement Documentation
+## The live build — 45 minutes
 
-To avoid delays in processing by PlainSight, please submit the following:
-
-- Receipts for approved expenses  
-- Final number of in person attendees
-- Event report or summary  
-- Event photos and/or evidence of attendance  
-
-Please ensure all materials are **accurate and complete** prior to submission.
-
----
-
-## [Marketing Toolkit](https://aka.ms/MicrosoftBuild-localhost-marketingtoolkit)
-
-This marketing toolkit provides everything you need to successfully promote your Build //localhost event. All materials are ready to customize with your event details. [Marketing Toolkit](https://aka.ms/MicrosoftBuild-localhost-marketingtoolkit)
+| Time | Segment | What happens |
+|------|---------|--------------|
+| 0–5 min | **Setup** | Install extensions, sign in to GitHub Copilot |
+| 5–15 min | **Scaffold** | .NET 10 Minimal API + Azure Cosmos DB, via agent mode |
+| 15–25 min | **Test** | Unit tests & code coverage with Copilot |
+| 25–35 min | **Ship** | Push, open a PR, let Copilot summarise & review it |
+| 35–50 min | **Extend** | AI Agent in Azure AI Foundry, exposed via MCP |
+| 50–60 min | **Q&A** | Your questions, live |
 
 ---
 
-## Questions or Additional Information
+## Take this home — five things that stick
 
-For questions, contact the Azure Tech Groups team at  
-**azure-tech-groups@microsoft.com**
+1. **Agent mode** can scaffold a full cloud app in minutes — with the right prompts.
+2. **Tests and coverage** aren't an afterthought; Copilot makes them as easy as the code.
+3. **PRs are better with AI:** automatic summaries, inline suggestions, agent-mode fixes.
+4. **Azure AI Foundry** lets you build a code-first AI Agent in ~20 lines of .NET.
+5. **MCP closes the loop** — your app becomes a live data source Copilot can query.
 
-For more details, see the  
-[Frequently Asked Questions (FAQs)](https://github.com/microsoft/community-content/wiki/Microsoft-Build--localhost:-Frequently-Asked-Questions-(FAQs))
+---
 
+## Built with — the stack on stage
 
-# Community Content Repo
-### Prepared "content-in-a-box" from Microsoft for user groups, meetups, and events
+| AI & Copilot | Azure | Platform |
+|--------------|-------|----------|
+| GitHub Copilot (agent mode) | Azure AI Foundry | .NET 10 Minimal API |
+| Copilot Chat & Edits | AI Agent Service (Persistent Agents) | xUnit · Coverlet |
+| PR summaries & review | Azure Cosmos DB (serverless, keyless) | Model Context Protocol (MCP) |
+| | Azure Container Apps · azd · Bicep | VS Code |
 
-- **WHAT**: This repo contains slides and supporting demos to help anyone in the community quickly deliver a talk around topics important to Microsoft. The content is prepared by Microsoft but is free for you to reuse and remix to deliver to local user groups, meetups, and community events. All content is licensed under Creative Commons Attribution 4.0 and all sample code is MIT.
-- **WHY**: It takes time to develop new talks. 😅 Whether you're an experienced speaker or preparing to deliver your first talk, this content can help you get ready for your next speaking opportunity and expand the topics you're ready to cover as a speaker.
-- **WHO**: You! 🎉 This content is for anyone that wants to deliver a talk.
-- **WHEN**: Content in this repo will be updated quarterly. 📆 Check back often for new content-in-a-box resources. Old topics will be archived and new topics will be added so there's always something fresh to share with your community.
-- **HOW**: Simply clone or fork this repo and practice the content. 🗣️ Most content-in-a-box sessions include slides, supporting sample code (which may be linked in an external repository), and additional guidance for delivering the talk (sometimes including a video of the session being delivered so you can see an example in action). Some slides may need updates (like your bio); others are ready to go. You can use everything as prepared, or if you have your own style or time constraints, you can remix to fit your situation. Content is designed to fit in a 30 to 45 minute session (leaving time for Q&A).
+---
 
-# Contributing
+## Run it yourself
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
+The demo is fully repeatable — one command up, one command down. Everything is
+keyless (Microsoft Entra ID / managed identity); no secrets in source control.
+
+```powershell
+# Point the scripts at your subscription + tenant (git-ignored)
+cp .env.sample .azure/.env
+
+az login --tenant <tenant_id>
+az account set --subscription <subscription_id>
+
+./build-localhost/demos/ConfHub/scripts/Provision.ps1   # azd up — infra + deploy
+./build-localhost/demos/ConfHub/scripts/Seed-Cosmos.ps1 # seed sample sessions
+./build-localhost/demos/ConfHub/scripts/Cleanup.ps1     # azd down --force --purge
+```
+
+Full prerequisites, exact presenter steps, configuration and architecture details
+are in the **[presenter walkthrough](build-localhost/demos/ConfHub/README.md)**.
+
+| | |
+|---|---|
+| Demo app (ConfHub) | [build-localhost/demos/ConfHub](build-localhost/demos/ConfHub) |
+| Repeatable scripts | [build-localhost/demos/ConfHub/scripts](build-localhost/demos/ConfHub/scripts) |
+| Infrastructure (Bicep) | [build-localhost/demos/ConfHub/infra](build-localhost/demos/ConfHub/infra) |
+| Speaker deck | [build-localhost/Ship It - Speaker Deck.pptx](build-localhost/Ship%20It%20-%20Speaker%20Deck.pptx) |
+
+---
+
+## Contributing
+
+This project welcomes contributions and suggestions. Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
@@ -122,7 +130,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-# Legal Notices
+## Legal Notices
 
 Microsoft and any contributors grant you a license to the Microsoft documentation and other content
 in this repository under the [Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode),
@@ -132,19 +140,3 @@ see the [LICENSE](LICENSE) file, and grant you a license to any code in the repo
 Microsoft, Windows, Microsoft Azure and/or other Microsoft products and services referenced in the documentation
 may be either trademarks or registered trademarks of Microsoft in the United States and/or other countries.
 The licenses for this project do not grant you rights to use any Microsoft names, logos, or trademarks.
-Microsoft's general trademark guidelines can be found at http://go.microsoft.com/fwlink/?LinkID=254653.
-
-Privacy information can be found at https://privacy.microsoft.com
-
-Microsoft and any contributors reserve all other rights, whether under their respective copyrights, patents,
-or trademarks, whether by implication, estoppel or otherwise.
-
-## Getting Help
-
-If you get stuck or have any questions about building AI apps, join:
-
-[![Azure AI Foundry Discord](https://img.shields.io/badge/Discord-Azure_AI_Foundry_Community_Discord-blue?style=for-the-badge&logo=discord&color=5865f2&logoColor=fff)](https://aka.ms/foundry/discord)
-
-If you have product feedback or errors while building visit:
-
-[![Azure AI Foundry Developer Forum](https://img.shields.io/badge/GitHub-Azure_AI_Foundry_Developer_Forum-blue?style=for-the-badge&logo=github&color=000000&logoColor=fff)](https://aka.ms/foundry/forum)

@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: confhub
+metadata:
+  template: confhub@1.0.0
+
+# The ConfHub API is deployed to Azure Container Apps. azd builds the image from
+# the Dockerfile, pushes it to the provisioned Azure Container Registry, and
+# updates the Container App that carries the `azd-service-name: api` tag.
+services:
+  api:
+    project: ./src/ConfHub.Api
+    language: dotnet
+    host: containerapp
+    docker:
+      path: Dockerfile
+      context: .
+      # Build the image on Azure (ACR Tasks) so the demo doesn't require a local
+      # Docker/Podman runtime — keeps provisioning repeatable on any machine.
+      remoteBuild: true

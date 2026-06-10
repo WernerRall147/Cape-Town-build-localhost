@@ -1,31 +1,40 @@
+using Azure.Identity;
 using ConfHub.Api.Endpoints;
 using ConfHub.Api.Mcp;
 using ConfHub.Api.Services;
 using Microsoft.Azure.Cosmos;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Services ────────────────────────────────────────────────────────────────
 
-// Azure Cosmos DB
+// Azure Cosmos DB.
+// Uses a keyless connection (Microsoft Entra ID via DefaultAzureCredential) when no
+// AuthKey is supplied — the recommended production approach — and falls back to a
+// key-based connection for quick local demos.
 builder.Services.AddSingleton<CosmosClient>(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
     var endpoint = config["CosmosDb:AccountEndpoint"]
         ?? throw new InvalidOperationException("CosmosDb:AccountEndpoint is not configured.");
-    var authKey = config["CosmosDb:AuthKey"]
-        ?? throw new InvalidOperationException("CosmosDb:AuthKey is not configured.");
-    return new CosmosClient(endpoint, authKey, new CosmosClientOptions
+    var authKey = config["CosmosDb:AuthKey"];
+
+    var options = new CosmosClientOptions
     {
         SerializerOptions = new CosmosSerializationOptions
         {
             PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
         }
-    });
+    };
+
+    return string.IsNullOrWhiteSpace(authKey)
+        ? new CosmosClient(endpoint, new DefaultAzureCredential(), options)
+        : new CosmosClient(endpoint, authKey, options);
 });
 builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
 
-// Azure AI Foundry Agent
+// Azure AI Foundry Agent (keyless — Microsoft Entra ID)
 builder.Services.AddSingleton<IAgentService, AgentService>();
 
 // MCP Server — exposes ConfHub data as MCP tools for GitHub Copilot
@@ -33,17 +42,8 @@ builder.Services.AddMcpServer()
     .WithHttpTransport()
     .WithTools<SessionMcpTools>();
 
-// OpenAPI / Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new()
-    {
-        Title = "ConfHub API",
-        Version = "v1",
-        Description = "Conference session management API with AI-powered recommendations and MCP server support."
-    });
-});
+// Built-in OpenAPI document (.NET 10)
+builder.Services.AddOpenApi();
 
 // ── App pipeline ────────────────────────────────────────────────────────────
 
@@ -51,8 +51,9 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ConfHub API v1"));
+    // OpenAPI JSON at /openapi/v1.json + interactive Scalar reference at /scalar
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();

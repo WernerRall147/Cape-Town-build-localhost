@@ -1,0 +1,66 @@
+[
+  {
+    "title": "Ship It: Build, Test & Deploy AI-Powered Apps with GitHub Copilot and Azure AI Foundry",
+    "speaker": "Werner Rall",
+    "track": "AI",
+    "level": 200,
+    "abstract": "Go from a blank VS Code window to a production-ready, AI-powered cloud app live on stage using Copilot agent mode, Azure Cosmos DB, Azure AI Foundry and MCP.",
+    "room": "Hall A"
+  },
+  {
+    "title": "Getting Started with GitHub Copilot Agent Mode",
+    "speaker": "Alice Nkosi",
+    "track": "AI",
+    "level": 100,
+    "abstract": "Learn how agent mode plans and executes multi-step coding tasks, edits across files, and runs your tests — all from natural language.",
+    "room": "Room 1"
+  },
+  {
+    "title": "Designing Globally Distributed Apps with Azure Cosmos DB",
+    "speaker": "Bongani Dlamini",
+    "track": "Azure",
+    "level": 300,
+    "abstract": "Partitioning, consistency levels, serverless vs provisioned throughput, and keyless access with managed identity.",
+    "room": "Room 2"
+  },
+  {
+    "title": "Model Context Protocol: Grounding Copilot in Your Live Data",
+    "speaker": "Chen Wei",
+    "track": "AI",
+    "level": 200,
+    "abstract": "Build an MCP server that exposes your application's data as tools GitHub Copilot can query in real time.",
+    "room": "Room 1"
+  },
+  {
+    "title": "Keyless Azure: Managed Identity and Microsoft Entra ID Everywhere",
+    "speaker": "Thandiwe Mokoena",
+    "track": "Security",
+    "level": 200,
+    "abstract": "Stop shipping secrets. Use DefaultAzureCredential, user-assigned managed identities, and data-plane RBAC for Cosmos DB and Azure AI Foundry.",
+    "room": "Room 3"
+  },
+  {
+    "title": "From Localhost to Container Apps with azd",
+    "speaker": "Pieter van der Merwe",
+    "track": "DevOps",
+    "level": 200,
+    "abstract": "One command up, one command down. Infrastructure as Code with Bicep and the Azure Developer CLI for repeatable deployments.",
+    "room": "Room 2"
+  },
+  {
+    "title": "Building Code-First AI Agents on Azure AI Foundry",
+    "speaker": "Fatima Patel",
+    "track": "AI",
+    "level": 300,
+    "abstract": "Create, run and orchestrate agents with the GA Persistent Agents SDK — threads, runs, tools and grounding.",
+    "room": "Hall A"
+  },
+  {
+    "title": "Testing and Code Coverage with Copilot",
+    "speaker": "Sipho Khumalo",
+    "track": "DevOps",
+    "level": 100,
+    "abstract": "Let Copilot generate xUnit tests, wire up coverage, and keep your pull requests green.",
+    "room": "Room 3"
+  }
+]
