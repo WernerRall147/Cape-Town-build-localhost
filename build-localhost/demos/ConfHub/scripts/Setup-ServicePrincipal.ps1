@@ -21,7 +21,18 @@ param(
 . "$PSScriptRoot/_Common.ps1"
 
 $demoEnv = Get-DemoEnv
-Assert-AzureContext -DemoEnv $demoEnv
+$account = Assert-AzureContext -DemoEnv $demoEnv
+Assert-SubscriptionAccess -DemoEnv $demoEnv
+
+if ($account.user.type -eq 'servicePrincipal') {
+    Write-Host ''
+    Write-Host 'You are signed in as a service principal. Creating a new app registration' -ForegroundColor Yellow
+    Write-Host 'usually requires a user account with directory privileges (or a service' -ForegroundColor Yellow
+    Write-Host 'principal granted Microsoft Graph Application.ReadWrite). If creation fails,' -ForegroundColor Yellow
+    Write-Host 'sign in interactively as a user first:' -ForegroundColor Yellow
+    Write-Host "  az login --tenant $($demoEnv['tenant_id'])" -ForegroundColor Cyan
+    Write-Host ''
+}
 
 $subscriptionId = $demoEnv['subscription_id']
 $scope = "/subscriptions/$subscriptionId"

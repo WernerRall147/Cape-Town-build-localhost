@@ -27,6 +27,7 @@ param(
 
 $demoEnv = Get-DemoEnv
 Assert-AzureContext -DemoEnv $demoEnv
+Assert-SubscriptionAccess -DemoEnv $demoEnv
 Assert-Command -Name azd -InstallHint 'Install from https://aka.ms/azd'
 
 $demoRoot = Get-DemoRoot

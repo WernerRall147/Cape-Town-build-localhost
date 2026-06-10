@@ -23,7 +23,8 @@ var cosmosContainerName = 'sessions'
 
 // Built-in role definition ids
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
-var aiDeveloperRoleId = '64702f94-c441-49e6-a78b-ef80e0188fee'
+// Foundry User — grants Microsoft.CognitiveServices/* data actions (incl. agents/write)
+var foundryUserRoleId = '53ca6127-db72-4b80-b1b0-d745d6d5456d'
 var openAiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
 var cosmosDataContributorRoleId = '00000000-0000-0000-0000-000000000002'
 
@@ -212,11 +213,11 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
 }
 
 // AI roles for the app identity
-resource aiDevRoleApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(foundry.id, identity.id, aiDeveloperRoleId)
+resource aiUserRoleApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(foundry.id, identity.id, foundryUserRoleId)
   scope: foundry
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', aiDeveloperRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -233,11 +234,11 @@ resource openAiRoleApp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 // AI roles for the developer (optional)
-resource aiDevRoleUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(principalId)) {
-  name: guid(foundry.id, principalId, aiDeveloperRoleId)
+resource aiUserRoleUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(principalId)) {
+  name: guid(foundry.id, principalId, foundryUserRoleId)
   scope: foundry
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', aiDeveloperRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
     principalId: principalId
   }
 }

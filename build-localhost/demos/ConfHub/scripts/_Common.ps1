@@ -78,5 +78,30 @@ function Assert-AzureContext {
         throw 'Wrong Azure context. Sign in and re-run this script.'
     }
 
-    Write-Host "Azure context OK — subscription '$($account.name)' ($wantSub)" -ForegroundColor Green
+    $identityType = $account.user.type
+    Write-Host "Azure context OK — subscription '$($account.name)' ($wantSub), identity '$($account.user.name)' [$identityType]" -ForegroundColor Green
+    return $account
 }
+
+<#
+    Verifies the active identity can actually read the target subscription. Catches
+    the common case where the CLI default subscription was switched but the identity
+    has no RBAC on it (e.g. a cached service principal with no role assignments).
+#>
+function Assert-SubscriptionAccess {
+    param([Parameter(Mandatory)][hashtable] $DemoEnv)
+
+    $sub = $DemoEnv['subscription_id']
+    az group list --subscription $sub --query "[0].name" --output tsv 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        $account = az account show 2>$null | ConvertFrom-Json
+        Write-Host ''
+        Write-Host "The active identity '$($account.user.name)' [$($account.user.type)] cannot read subscription $sub." -ForegroundColor Yellow
+        Write-Host 'It has no RBAC permissions there, so it cannot provision resources or assign roles.' -ForegroundColor Yellow
+        Write-Host 'Sign in interactively as a user with Owner (or Contributor + User Access Administrator):' -ForegroundColor Yellow
+        Write-Host "  az login --tenant $($DemoEnv['tenant_id'])" -ForegroundColor Cyan
+        Write-Host "  az account set --subscription $sub" -ForegroundColor Cyan
+        throw 'Active identity lacks access to the target subscription.'
+    }
+}
+

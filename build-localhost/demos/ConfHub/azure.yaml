@@ -15,3 +15,6 @@ services:
     docker:
       path: Dockerfile
       context: .
+      # Build the image on Azure (ACR Tasks) so the demo doesn't require a local
+      # Docker/Podman runtime — keeps provisioning repeatable on any machine.
+      remoteBuild: true
